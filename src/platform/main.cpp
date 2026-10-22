@@ -5,8 +5,15 @@
 #include <gameMain.h>
 #include <asserts.h>
 
+#include <memory>
+
+
+
 int main(void)
 {
+
+	extern int global_blockType;
+	global_blockType = 0;
 
 #if PRODUCTION_BUILD == 1
 	SetTraceLogLevel(LOG_NONE); //no log output to console by raylib
@@ -52,6 +59,11 @@ int main(void)
 
 #pragma region imgui windows
 
+		ImGui::Begin("Select Block Type");
+
+		ImGui::InputInt("Select Block", &global_blockType);
+
+		ImGui::End();
 		
 
 #pragma endregion

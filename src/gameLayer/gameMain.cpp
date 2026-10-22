@@ -5,6 +5,9 @@
 #include <gameMap.h>
 #include <iostream>
 #include <helpers.h>
+#include <raymath.h>
+
+int global_blockType;
 
 struct GameData {
 
@@ -22,7 +25,13 @@ bool initGame() {
 
 	assetManager.loadAll();
 
-	gameData.gameMap.create(30, 10);
+	gameData.gameMap.create(700, 500);
+
+	for (int i = 0;  i < 700; ++i) {
+		for (int j = 0; j < 500; ++j) {
+			gameData.gameMap.getBlockUnsafe(i, j).type = Block::stone;
+		}
+	}
 
 	gameData.gameMap.getBlockUnsafe(0, 0).type = Block::dirt;
 	gameData.gameMap.getBlockUnsafe(1, 1).type = Block::grassBlock;
@@ -58,9 +67,11 @@ bool updateGame() {
 #pragma endregion
 
 	Vector2 worldPos = GetScreenToWorld2D(GetMousePosition(), gameData.camera);
+	//converts float to int by truncating
 	int blockX = (int)floor(worldPos.x);
 	int blockY = (int)floor(worldPos.y);
 
+	//delete block
 	if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
 
 		auto block = gameData.gameMap.getBlockSafe(blockX, blockY);
@@ -71,22 +82,47 @@ bool updateGame() {
 		}
 	}
 
+	//place block
 	if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) {
 
 		auto block = gameData.gameMap.getBlockSafe(blockX, blockY);
 
 		if (block) {
+			if (global_blockType < Block::BLOCKS_COUNT) {
 
-			block->type =Block::gold;
+				block->type = global_blockType;
+			}
+			else {
+				block->type = Block::air;
+			}
 		}
 	}
 
 #pragma region draw world
+
 	//do all rendering between BeginMode2d and EndMode2d
 	BeginMode2D(gameData.camera);
 
-	for (int y = 0; y < gameData.gameMap.h; ++y) {
-		for (int x = 0; x < gameData.gameMap.w; ++x) {
+	//gets top left and bottom right of screen as viewed by camera
+	Vector2 topLeftView = GetScreenToWorld2D({ 0, 0 }, gameData.camera);
+	Vector2 bottomRightView = GetScreenToWorld2D({ (float)GetScreenWidth(), (float)GetScreenHeight()}, gameData.camera);
+
+	//adds padding so covers a little more than the visible area
+	int startXView = (int)floorf(topLeftView.x - 1);
+	int endXView = (int)ceilf(bottomRightView.x + 1);
+	int startYView = (int)floorf(topLeftView.y - 1);
+	int endYView = (int)ceilf(bottomRightView.y + 1);
+
+	//makes sure values wont exceed max and min bounds, all clmap does is places the values within these bounds
+	startXView = Clamp(startXView, 0, gameData.gameMap.w - 1); //Clamp(value, min, max)
+	endXView = Clamp(endXView, 0, gameData.gameMap.w - 1);
+
+	startYView = Clamp(startYView, 0, gameData.gameMap.h - 1);
+	endYView = Clamp(endYView, 0, gameData.gameMap.h - 1);
+
+
+	for (int y = startYView; y < endYView; ++y) {
+		for (int x = startXView; x < endXView; ++x) {
 			
 			auto& block = gameData.gameMap.getBlockUnsafe(x, y);
 			
@@ -110,7 +146,7 @@ bool updateGame() {
 
 	//draw selected block (must be after other blocks are rendered so frame is drawn on top)
 	DrawTexturePro(
-		assetManager.frame, //texture atlas
+		assetManager.frame, //texture
 		{ 0, 0, (float)assetManager.frame.width, (float)assetManager.frame.height }, // source
 		{ (float)blockX, (float)blockY, 1, 1 }, //destination (x position, y position, block width, block height)
 		{ 0,0 }, //origin
@@ -118,12 +154,12 @@ bool updateGame() {
 		WHITE
 	);
 
-
-
 	//do all rendering between beginmode2d and endmode2d
 	EndMode2D();
 
 #pragma endregion
+
+	DrawFPS(10, 10);
 
 	return true;
 }
