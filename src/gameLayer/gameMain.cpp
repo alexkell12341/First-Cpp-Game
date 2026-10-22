@@ -1,17 +1,39 @@
-#include <iostream>
 #include <raylib.h>
-#include <fstream>
-
+#include "gameMain.h"
+#include <asserts.h>
+#include <assetManager.h>
+#include <gameMap.h>
+#include <iostream>
+#include <helpers.h>
 
 struct GameData {
 
-	float positionX = 100;
-	float positionY = 100;
+	GameMap gameMap;
+	Camera2D camera;
+
 
 }gameData;
 
+//assets should be held seperate to game state, so textures are still loaded if map is deleted/changed, therefore assetManager is defined outside of gameData
+AssetManager assetManager;
+
 
 bool initGame() {
+
+	assetManager.loadAll();
+
+	gameData.gameMap.create(30, 10);
+
+	gameData.gameMap.getBlockUnsafe(0, 0).type = Block::dirt;
+	gameData.gameMap.getBlockUnsafe(1, 1).type = Block::grassBlock;
+	gameData.gameMap.getBlockUnsafe(2, 2).type = Block::goldBlock;
+	gameData.gameMap.getBlockUnsafe(3, 3).type = Block::glass;
+	gameData.gameMap.getBlockUnsafe(4, 4).type = Block::platform;
+
+	gameData.camera.target = { 0,0 }; //world-space centre of view, we will use this as the camera position
+	gameData.camera.rotation = 0.0f;
+	gameData.camera.zoom = 100.0f;
+
 	return true;
 }
 
@@ -21,14 +43,45 @@ bool updateGame() {
 	//limits max deltaTime to 5 frames per second to prevent jumping
 	if (deltaTime > 1.f / 5) { deltaTime = 1 / 5.f; }
 
-	//moves 200 pixels per second
-	if (IsKeyDown(KEY_A)) { gameData.positionX -= 200 * deltaTime; }
-	if (IsKeyDown(KEY_D)) { gameData.positionX += 200 * deltaTime; }
-	if (IsKeyDown(KEY_W)) { gameData.positionY -= 200 * deltaTime; }
-	if (IsKeyDown(KEY_S)) { gameData.positionY += 200 * deltaTime; }
+	gameData.camera.offset = { GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
+	
+	ClearBackground({ 75,75,150,255 });
 
-	//positionX, positionY, sizeX, sizeY, colour
-	DrawRectangle(gameData.positionX, gameData.positionY, 50, 50, { 255,0,200,255 });
+#pragma region camera movement
+
+	//7 blocks per second
+	if (IsKeyDown(KEY_LEFT)) gameData.camera.target.x -= 7.f * deltaTime;
+	if (IsKeyDown(KEY_RIGHT)) gameData.camera.target.x += 7.f * deltaTime;
+	if (IsKeyDown(KEY_UP)) gameData.camera.target.y -= 7.f * deltaTime;
+	if (IsKeyDown(KEY_DOWN)) gameData.camera.target.y += 7.f * deltaTime;
+
+#pragma endregion
+
+	//do all rendering between BeginMode2d and EndMode2d
+	BeginMode2D(gameData.camera);
+
+	for (int y = 0; y < gameData.gameMap.h; ++y) {
+		for (int x = 0; x < gameData.gameMap.w; ++x) {
+
+			auto& block = gameData.gameMap.getBlockUnsafe(x, y);
+
+			if (block.type != Block::air) {
+
+
+				DrawTexturePro(
+					assetManager.textures, //texture atlas
+					getTextureAtlas(block.type, 0, 32, 32), // source
+					{ (float)x, (float)y, 1, 1 }, //destination (x position, y position, block width, block height)
+					{ 0,0 }, //origin
+					0.0f, //rotation
+					WHITE //tint
+				);
+			}
+		}
+	}
+
+	//do all rendering between beginmode2d and endmode2d
+	EndMode2D();
 
 	return true;
 }
