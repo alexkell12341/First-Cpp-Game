@@ -57,13 +57,40 @@ bool updateGame() {
 
 #pragma endregion
 
+	Vector2 worldPos = GetScreenToWorld2D(GetMousePosition(), gameData.camera);
+	int blockX = (int)floor(worldPos.x);
+	int blockY = (int)floor(worldPos.y);
+
+	if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+
+		auto block = gameData.gameMap.getBlockSafe(blockX, blockY);
+
+		if (block) {
+
+			*block = {};
+		}
+	}
+
+	if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) {
+
+		auto block = gameData.gameMap.getBlockSafe(blockX, blockY);
+
+		if (block) {
+
+			block->type =Block::gold;
+		}
+	}
+
+#pragma region draw world
 	//do all rendering between BeginMode2d and EndMode2d
 	BeginMode2D(gameData.camera);
 
 	for (int y = 0; y < gameData.gameMap.h; ++y) {
 		for (int x = 0; x < gameData.gameMap.w; ++x) {
-
+			
 			auto& block = gameData.gameMap.getBlockUnsafe(x, y);
+			
+			
 
 			if (block.type != Block::air) {
 
@@ -77,11 +104,26 @@ bool updateGame() {
 					WHITE //tint
 				);
 			}
+
 		}
 	}
 
+	//draw selected block (must be after other blocks are rendered so frame is drawn on top)
+	DrawTexturePro(
+		assetManager.frame, //texture atlas
+		{ 0, 0, (float)assetManager.frame.width, (float)assetManager.frame.height }, // source
+		{ (float)blockX, (float)blockY, 1, 1 }, //destination (x position, y position, block width, block height)
+		{ 0,0 }, //origin
+		0.0f, //rotation
+		WHITE
+	);
+
+
+
 	//do all rendering between beginmode2d and endmode2d
 	EndMode2D();
+
+#pragma endregion
 
 	return true;
 }
