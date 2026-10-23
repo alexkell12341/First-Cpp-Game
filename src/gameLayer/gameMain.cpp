@@ -25,11 +25,17 @@ bool initGame() {
 
 	assetManager.loadAll();
 
-	gameData.gameMap.create(700, 500);
+	gameData.gameMap.create(30, 10);
 
-	for (int i = 0;  i < 700; ++i) {
-		for (int j = 0; j < 500; ++j) {
-			gameData.gameMap.getBlockUnsafe(i, j).type = Block::stone;
+	for (int i = 0;  i < 30; ++i) {
+		for (int j = 0; j < 10; ++j) {
+
+			if (j == 4) {
+				gameData.gameMap.getBlockUnsafe(i, j).type = Block::grassBlock;
+			}
+			else if (j >4) {
+				gameData.gameMap.getBlockUnsafe(i, j).type = Block::dirt;
+			}
 		}
 	}
 
@@ -131,14 +137,114 @@ bool updateGame() {
 			if (block.type != Block::air) {
 
 
-				DrawTexturePro(
-					assetManager.textures, //texture atlas
-					getTextureAtlas(block.type, 0, 32, 32), // source
-					{ (float)x, (float)y, 1, 1 }, //destination (x position, y position, block width, block height)
-					{ 0,0 }, //origin
-					0.0f, //rotation
-					WHITE //tint
-				);
+#pragma region tree textures
+				if (block.type == Block::woodLog) {
+
+					
+					//leaves above log
+					if (gameData.gameMap.getBlockSafe(x, y - 1) && gameData.gameMap.getBlockSafe(x, y - 1)->type == Block::leaves) {
+						DrawTexturePro(
+							assetManager.treeTextures, //texture atlas
+							getTextureAtlas(5, 0, 32, 32), // source
+							{ (float)x, (float)y, 1, 1 }, //destination (x position, y position, block width, block height)
+							{ 0,0 }, //origin
+							0.0f, //rotation
+							WHITE //tint
+						);
+					}//leaves left and right
+					else if (gameData.gameMap.getBlockSafe(x - 1, y)->type && gameData.gameMap.getBlockSafe(x - 1, y)->type == Block::leaves && gameData.gameMap.getBlockSafe(x + 1, y) && gameData.gameMap.getBlockSafe(x + 1, y)->type == Block::leaves) {
+						DrawTexturePro(
+							assetManager.treeTextures, //texture atlas
+							getTextureAtlas(1, 0, 32, 32), // source
+							{ (float)x, (float)y, 1, 1 }, //destination (x position, y position, block width, block height)
+							{ 0,0 }, //origin
+							0.0f, //rotation
+							WHITE //tint
+						);
+
+					}//leaves on left only
+					else if (gameData.gameMap.getBlockSafe(x - 1, y) && gameData.gameMap.getBlockSafe(x - 1, y)->type == Block::leaves) {
+						
+						DrawTexturePro(
+							assetManager.treeTextures, //texture atlas
+							getTextureAtlas(3, 0, 32, 32), // source
+							{ (float)x, (float)y, 1, 1 }, //destination (x position, y position, block width, block height)
+							{ 0,0 }, //origin
+							0.0f, //rotation
+							WHITE //tint
+						);
+					
+					
+					}// leaves on right only
+					else if (gameData.gameMap.getBlockSafe(x + 1, y) && gameData.gameMap.getBlockSafe(x + 1, y)->type == Block::leaves) {
+						
+						DrawTexturePro(
+							assetManager.treeTextures, //texture atlas
+							getTextureAtlas(2, 0, 32, 32), // source
+							{ (float)x, (float)y, 1, 1 }, //destination (x position, y position, block width, block height)
+							{ 0,0 }, //origin
+							0.0f, //rotation
+							WHITE //tint
+						);
+					
+					}//normal log
+					else if (gameData.gameMap.getBlockSafe(x, y - 1) && gameData.gameMap.getBlockSafe(x, y - 1)->type == Block::woodLog && gameData.gameMap.getBlockSafe(x, y + 1) && gameData.gameMap.getBlockSafe(x, y + 1)->type == Block::woodLog) {
+						DrawTexturePro(
+							assetManager.treeTextures, //texture atlas
+							getTextureAtlas(0, 0, 32, 32), // source
+							{ (float)x, (float)y, 1, 1 }, //destination (x position, y position, block width, block height)
+							{ 0,0 }, //origin
+							0.0f, //rotation
+							WHITE //tint
+						);
+					}//first log
+					else if (gameData.gameMap.getBlockSafe(x, y - 1) && gameData.gameMap.getBlockSafe(x, y - 1)->type == Block::woodLog) {
+
+						DrawTexturePro(
+							assetManager.treeTextures, //texture atlas
+							getTextureAtlas(4, 0, 32, 32), // source
+							{ (float)x, (float)y, 1, 1 }, //destination (x position, y position, block width, block height)
+							{ 0,0 }, //origin
+							0.0f, //rotation
+							WHITE //tint
+						);
+
+					}//cutoff log
+					else if (gameData.gameMap.getBlockSafe(x, y + 1) && gameData.gameMap.getBlockSafe(x, y + 1)->type == Block::woodLog) {
+
+						DrawTexturePro(
+							assetManager.treeTextures, //texture atlas
+							getTextureAtlas(6, 0, 32, 32), // source
+							{ (float)x, (float)y, 1, 1 }, //destination (x position, y position, block width, block height)
+							{ 0,0 }, //origin
+							0.0f, //rotation
+							WHITE //tint
+						);
+					}
+#pragma endregion 
+					else {
+
+						DrawTexturePro(
+							assetManager.treeTextures, //texture atlas
+							getTextureAtlas(7, 0, 32, 32), // source
+							{ (float)x, (float)y, 1, 1 }, //destination (x position, y position, block width, block height)
+							{ 0,0 }, //origin
+							0.0f, //rotation
+							WHITE //tint
+						);
+					}
+				}
+				else {
+
+					DrawTexturePro(
+						assetManager.textures, //texture atlas
+						getTextureAtlas(block.type, 0, 32, 32), // source
+						{ (float)x, (float)y, 1, 1 }, //destination (x position, y position, block width, block height)
+						{ 0,0 }, //origin
+						0.0f, //rotation
+						WHITE //tint
+					);
+				}
 			}
 
 		}
