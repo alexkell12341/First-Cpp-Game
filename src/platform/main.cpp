@@ -4,8 +4,7 @@
 #include <rlImGui.h>
 #include <gameMain.h>
 #include <asserts.h>
-
-#include <memory>
+#include <randomStuff.h>
 
 
 
@@ -38,6 +37,7 @@ int main(void)
 	if (!initGame()) {
 		return 0; 
 	}
+
 
 	while (!WindowShouldClose()) {
 

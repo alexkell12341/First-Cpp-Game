@@ -6,6 +6,7 @@
 #include <iostream>
 #include <helpers.h>
 #include <raymath.h>
+#include <randomStuff.h>
 
 int global_blockType;
 
