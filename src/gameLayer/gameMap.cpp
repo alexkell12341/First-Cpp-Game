@@ -5,11 +5,13 @@ void GameMap::create(int w, int h)
 {
 	*this = {}; //reset the entire struct
 	mapData.resize(w * h);
+	mapBackground.resize(w * h);
 
 	this->w = w;
 	this->h = h;
 
 	for (auto& block : mapData) { block = {}; } //clear all block data
+	for (auto& wall : mapBackground) { wall = {}; } //clear all block data
 }
 
 Block& GameMap::getBlockUnsafe(int x, int y) {
@@ -26,4 +28,20 @@ Block* GameMap::getBlockSafe(int x, int y) {
 	if (x < 0 || y < 0 || x >= w || y >= h ) { return nullptr; }
 
 	return &mapData[x + y * w];
+}
+
+Block& GameMap::getWallUnsafe(int x, int y) {
+	permaAssertCommentDevelopement(mapBackground.size() == w * h, "Map background not initialised");
+
+	permaAssertCommentDevelopement(x >= 0 && y >= 0 && x < w && y < h, "getBlockUnsafe out of bounds error");
+
+	return mapBackground[x + y * w];
+}
+
+Block* GameMap::getWallSafe(int x, int y) {
+	permaAssertCommentDevelopement(mapBackground.size() == w * h, "Map background not initialised");
+
+	if (x < 0 || y < 0 || x >= w || y >= h) { return nullptr; }
+
+	return &mapBackground[x + y * w];
 }

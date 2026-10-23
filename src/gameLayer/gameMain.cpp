@@ -104,6 +104,33 @@ bool updateGame() {
 		}
 	}
 
+	//delete wall
+	if (IsKeyDown(KEY_LEFT_SHIFT)) {
+
+		auto wall = gameData.gameMap.getWallSafe(blockX, blockY);
+
+		if (wall) {
+
+			*wall = {};
+		}
+	}
+
+	//place wall
+	if (IsKeyDown(KEY_LEFT_CONTROL)) {
+
+		auto wall = gameData.gameMap.getWallSafe(blockX, blockY);
+
+		if (wall) {
+			if (global_blockType > Block::BLOCKS_COUNT && global_blockType < Block::WALLS_AND_BLOCKS_COUNT) {
+
+				wall->type = global_blockType;
+			}
+			else {
+				wall->type = Block::air;
+			}
+		}
+	}
+
 #pragma region draw world
 
 	//do all rendering between BeginMode2d and EndMode2d
@@ -131,9 +158,23 @@ bool updateGame() {
 		for (int x = startXView; x < endXView; ++x) {
 			
 			auto& block = gameData.gameMap.getBlockUnsafe(x, y);
-			
-			
+			auto& wall = gameData.gameMap.getWallUnsafe(x, y);
 
+			if (wall.type != Block::air) {
+				
+				DrawTexturePro(
+					assetManager.textures, //texture atlas
+					getTextureAtlas(wall.type - 1, 0, 32, 32), // source
+					{ (float)x, (float)y, 1, 1 }, //destination (x position, y position, block width, block height)
+					{ 0,0 }, //origin
+					0.0f, //rotation
+					WHITE //tint
+				);
+
+			}
+			
+			
+			
 			if (block.type != Block::air) {
 
 
@@ -221,7 +262,7 @@ bool updateGame() {
 							WHITE //tint
 						);
 					}
-#pragma endregion 
+
 					else {
 
 						DrawTexturePro(
@@ -233,6 +274,7 @@ bool updateGame() {
 							WHITE //tint
 						);
 					}
+#pragma endregion
 				}
 				else {
 

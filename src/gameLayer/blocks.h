@@ -63,6 +63,27 @@ struct Block
 
 		BLOCKS_COUNT,
 
+		dirtWall,
+		stoneWall, 
+		woodWall, 
+		sandStoneWall, 
+		brickWall, 
+		glassWall, 
+		copperBlockWall, 
+		silverBlockWall, 
+		goldBlockWall, 
+		snowWall, 
+		sandWall, 
+		stoneBricksWall, 
+		rubyBlockWall, 
+		heroglyphWall, 
+		blueRubyWall, 
+		plankedWall, 
+		snowBrickWall, 
+		boneBrickWall,
+
+		WALLS_AND_BLOCKS_COUNT
+
 	};
 
 	// 0 to 65535
